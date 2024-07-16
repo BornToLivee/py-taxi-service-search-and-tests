@@ -12,7 +12,7 @@ from taxi.templatetags.query_transform import query_transform
 
 class DriverCreatingFormTest(TestCase):
 
-    def test_driver_creation_form_is_valid(self):
+    def get_form_data(self, **overrides):
         form_data = {
             "username": "new_user",
             "password1": "poiuytre123456",
@@ -21,34 +21,22 @@ class DriverCreatingFormTest(TestCase):
             "first_name": "John",
             "last_name": "Doe",
         }
-        form = DriverCreationForm(data=form_data)
+        form_data.update(overrides)
+        return form_data
+
+    def test_driver_creation_form_is_valid(self):
+        form = DriverCreationForm(data=self.get_form_data())
         self.assertTrue(form.is_valid())
 
     def test_form_saves_new_driver_instance_successfully(self):
-        form_data = {
-            "username": "new_user",
-            "password1": "poiuytre123456",
-            "password2": "poiuytre123456",
-            "first_name": "John",
-            "last_name": "Doe",
-            "license_number": "TST23456",
-        }
-        form = DriverCreationForm(data=form_data)
+        form = DriverCreationForm(data=self.get_form_data())
         if form.is_valid():
             driver = form.save()
             self.assertIsInstance(driver, Driver)
-            self.assertEqual(driver.username, form_data["username"])
+            self.assertEqual(driver.username, form.cleaned_data["username"])
 
-    def test_form_is_invalid_with_correct_license_number(self):
-        form_data = {
-            "username": "new_user",
-            "password1": "<PASSWORD>",
-            "password2": "<PASSWORD>",
-            "first_name": "John",
-            "last_name": "Doe",
-            "license_number": "tys12",
-        }
-        form = DriverCreationForm(data=form_data)
+    def test_form_is_invalid_with_incorrect_license_number(self):
+        form = DriverCreationForm(data=self.get_form_data(license_number="tys12"))
         self.assertFalse(form.is_valid())
         self.assertIn("license_number", form.errors)
 
