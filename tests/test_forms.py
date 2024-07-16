@@ -36,7 +36,9 @@ class DriverCreatingFormTest(TestCase):
             self.assertEqual(driver.username, form.cleaned_data["username"])
 
     def test_form_is_invalid_with_incorrect_license_number(self):
-        form = DriverCreationForm(data=self.get_form_data(license_number="tys12"))
+        form = DriverCreationForm(
+            data=self.get_form_data(license_number="tys12")
+        )
         self.assertFalse(form.is_valid())
         self.assertIn("license_number", form.errors)
 
